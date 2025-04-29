@@ -9,6 +9,9 @@ class TaskViewModel extends ChangeNotifier {
   final TaskService _taskService = TaskService();
   final AuthService _authService = AuthService();
   static const String _baseUrl = 'https://todo-app-fresh.web.app';
+  static const String _customScheme = 'todoapp';
+  static const String _customHost = 'task';
+
   bool _isLoading = false;
   List<Task> _tasks = [];
   List<Task> _sharedTasks = [];
@@ -219,7 +222,8 @@ class TaskViewModel extends ChangeNotifier {
     String recipientEmail,
     String taskId,
   ) async {
-    final String taskLink = '$_baseUrl/task/$taskId';
+    final String webLink = '$_baseUrl/task/$taskId';
+    final String customLink = '$_customScheme://$_customHost/$taskId';
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: recipientEmail,
@@ -227,11 +231,15 @@ class TaskViewModel extends ChangeNotifier {
         'subject': 'Shared Task: $taskTitle',
         'body': '''
 Hi,
-
 I'd like to share a task with you: "$taskTitle"
 
-Click the link below to view and accept the task:
-$taskLink
+Click one of the links below to view and accept the task:
+
+Web link:
+$webLink
+
+If you have the app installed, opening this link on your mobile device will open the task in the app.
+$customLink
 
 Best regards''',
       },
@@ -249,12 +257,17 @@ Best regards''',
   }
 
   Future<void> shareTaskViaApp(String taskTitle, String taskId) async {
-    final String taskLink = '$_baseUrl/task/$taskId';
-    final String shareText = '''
-Check out this task: "$taskTitle"
+    final String webLink = '$_baseUrl/task/$taskId';
+    final String customLink = '$_customScheme://$_customHost/$taskId';
+    final String shareText = '''Check out this task: "$taskTitle"
 
-Click the link to view and accept the task:
-$taskLink''';
+Click one of the links below to view and accept the task:
+
+Web link:
+$webLink
+
+Mobile app link:
+$customLink''';
 
     try {
       await Share.share(shareText, subject: 'Shared Task: $taskTitle');

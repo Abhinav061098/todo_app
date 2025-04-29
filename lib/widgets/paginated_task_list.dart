@@ -93,18 +93,33 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isWideScreen = constraints.maxWidth > 600;
+              final width = constraints.maxWidth;
+
+              // More granular breakpoints for better responsiveness
+              final isWideScreen = width > 600;
+              final crossAxisCount = width > 1200
+                  ? 4
+                  : width > 900
+                      ? 3
+                      : width > 600
+                          ? 2
+                          : 1;
+              final aspectRatio = width > 900
+                  ? 1.8
+                  : width > 600
+                      ? 1.5
+                      : 2.0;
 
               if (isWideScreen) {
                 return GridView.builder(
                   controller: _scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: constraints.maxWidth > 900 ? 3 : 2,
-                    childAspectRatio: 1.5,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: aspectRatio,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                   ),
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(16),
                   itemCount: _displayedTasks.length,
                   itemBuilder: (context, index) => _buildTaskCard(
                     context,
@@ -113,13 +128,17 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
                 );
               }
 
+              // For narrow screens, use a more compact list view
               return ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(16),
                 itemCount: _displayedTasks.length,
-                itemBuilder: (context, index) => _buildTaskCard(
-                  context,
-                  _displayedTasks[index],
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildTaskCard(
+                    context,
+                    _displayedTasks[index],
+                  ),
                 ),
               );
             },

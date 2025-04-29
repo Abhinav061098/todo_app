@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:app_links/app_links.dart';
 import 'package:todo_app/viewmodels/auth_viewmodel.dart';
 import 'package:todo_app/viewmodels/task_viewmodel.dart';
 import 'package:todo_app/views/auth_wrapper.dart';
-import 'package:todo_app/views/home_view.dart';
-import 'package:todo_app/views/login_view.dart';
 import 'package:todo_app/views/add_shared_task_view.dart';
-import 'package:app_links/app_links.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -19,17 +16,107 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  late AppLinks _appLinks;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinking();
+  }
+
+  Future<void> _initDeepLinking() async {
+    _appLinks = AppLinks();
+
+    // Get initial link if app was launched from a link
+    final uri = await _appLinks.getInitialAppLink();
+    if (uri != null) {
+      _handleLink(uri);
+    }
+
+    // Handle links while app is running
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleLink(uri);
+    });
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final uri = Uri.parse(settings.name ?? '');
+    String? taskId = _extractTaskId(uri);
+
+    if (taskId != null) {
+      return MaterialPageRoute(
+        builder: (context) => FutureBuilder(
+          future: Provider.of<TaskViewModel>(context, listen: false)
+              .fetchTaskById(taskId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text('Error: ${snapshot.error}'),
+                ),
+              );
+            }
+            if (snapshot.hasData && snapshot.data != null) {
+              return AddSharedTaskView(task: snapshot.data!);
+            }
+            return const Scaffold(
+              body: Center(child: Text('Task not found')),
+            );
+          },
+        ),
+      );
+    }
+    return null;
+  }
+
+  String? _extractTaskId(Uri uri) {
+    // Handle web URL format
+    if (uri.host == 'todo-app-fresh.web.app' &&
+        uri.pathSegments.length == 2 &&
+        uri.pathSegments[0] == 'task') {
+      return uri.pathSegments[1];
+    }
+
+    // Handle custom scheme format
+    if (uri.scheme == 'todoapp' &&
+        uri.host == 'task' &&
+        uri.pathSegments.isNotEmpty) {
+      return uri.pathSegments.first;
+    }
+
+    return null;
+  }
+
+  void _handleLink(Uri uri) {
+    String? taskId = _extractTaskId(uri);
+    if (taskId != null && _navigatorKey.currentState != null) {
+      _navigatorKey.currentState!.pushNamed(uri.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: TaskViewModel()),
-        ChangeNotifierProvider.value(value: AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => TaskViewModel()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
       ],
       child: MaterialApp(
+        navigatorKey: _navigatorKey,
         title: 'Todo App',
         theme: ThemeData(
           useMaterial3: true,
@@ -38,57 +125,10 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
           appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 0,
-          ),
-          cardTheme: CardTheme(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            clipBehavior: Clip.antiAlias,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(width: 2),
-            ),
-          ),
-          snackBarTheme: SnackBarThemeData(
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          dialogTheme: DialogTheme(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
+            centerTitle: true, // This centers all AppBar titles
           ),
         ),
+        onGenerateRoute: _onGenerateRoute,
         home: const AuthWrapper(),
       ),
     );

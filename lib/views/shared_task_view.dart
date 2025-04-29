@@ -107,22 +107,32 @@ class _SharedTasksViewState extends State<SharedTasksView> {
 
             return LayoutBuilder(
               builder: (context, constraints) {
-                final isWideScreen = constraints.maxWidth > 600;
-                final crossAxisCount = constraints.maxWidth > 900 ? 3 : 2;
+                final width = constraints.maxWidth;
+                final isWideScreen = width > 600;
+                final crossAxisCount = width > 1200
+                    ? 4
+                    : width > 900
+                        ? 3
+                        : width > 600
+                            ? 2
+                            : 1;
+                final horizontalPadding =
+                    width > 1200 ? (width - 1200) / 2 : 16.0;
 
                 if (isWideScreen) {
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.fromLTRB(
+                        horizontalPadding, 16, horizontalPadding, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (pendingTasks.isNotEmpty) ...[
                           const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
+                            padding: EdgeInsets.symmetric(vertical: 16),
                             child: Text(
                               'Pending Tasks',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -141,15 +151,15 @@ class _SharedTasksViewState extends State<SharedTasksView> {
                             itemBuilder: (context, index) => _buildTaskCard(
                                 context, pendingTasks[index], true),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
                         ],
                         if (acceptedTasks.isNotEmpty) ...[
                           const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
+                            padding: EdgeInsets.symmetric(vertical: 16),
                             child: Text(
                               'Accepted Tasks',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -174,12 +184,13 @@ class _SharedTasksViewState extends State<SharedTasksView> {
                   );
                 }
 
+                // For narrow screens, use a list view
                 return ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(horizontalPadding),
                   children: [
                     if (pendingTasks.isNotEmpty) ...[
                       const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'Pending Tasks',
                           style: TextStyle(
@@ -192,11 +203,11 @@ class _SharedTasksViewState extends State<SharedTasksView> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: _buildTaskCard(context, task, true),
                           )),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                     ],
                     if (acceptedTasks.isNotEmpty) ...[
                       const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'Accepted Tasks',
                           style: TextStyle(

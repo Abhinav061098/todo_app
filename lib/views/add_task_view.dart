@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/task_model.dart';
 import '../viewmodels/task_viewmodel.dart';
-import '../viewmodels/auth_viewmodel.dart';
 
 class AddTaskView extends StatefulWidget {
   const AddTaskView({super.key});
@@ -24,25 +23,38 @@ class _AddTaskViewState extends State<AddTaskView> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // For wider screens, center the form with max width
-          final maxWidth =
-              constraints.maxWidth > 600 ? 600.0 : constraints.maxWidth;
-          final padding = constraints.maxWidth > 600
-              ? (constraints.maxWidth - maxWidth) / 2
-              : 16.0;
+          final width = constraints.maxWidth;
+          final maxWidth = width > 1200
+              ? 800.0
+              : width > 600
+                  ? 600.0
+                  : width;
+          final horizontalPadding =
+              width > maxWidth ? (width - maxWidth) / 2 : 16.0;
 
           return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(padding, 16, padding, 16),
+            padding: EdgeInsets.fromLTRB(
+                horizontalPadding, 24, horizontalPadding, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Card(
                   elevation: 2,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          'Create New Task',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 24),
                         TextField(
                           controller: _titleController,
                           decoration: const InputDecoration(
@@ -51,10 +63,7 @@ class _AddTaskViewState extends State<AddTaskView> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.title),
                           ),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 16),
                         TextField(
@@ -63,28 +72,38 @@ class _AddTaskViewState extends State<AddTaskView> {
                             labelText: 'Task Description',
                             hintText: 'Enter task description',
                             border: OutlineInputBorder(),
-                            alignLabelWithHint: true,
                             prefixIcon: Icon(Icons.description),
+                            alignLabelWithHint: true,
                           ),
                           maxLines: 5,
                         ),
                         const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: _isProcessing ? null : _addTask,
-                          icon: _isProcessing
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : const Icon(Icons.add),
-                          label: Text(_isProcessing ? 'Adding...' : 'Add Task'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                        Center(
+                          child: SizedBox(
+                            width: width > 600 ? 200 : double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _isProcessing ? null : _addTask,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 24,
+                                ),
+                              ),
+                              icon: _isProcessing
+                                  ? Container(
+                                      width: 24,
+                                      height: 24,
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : const Icon(Icons.add_task),
+                              label: Text(
+                                _isProcessing ? 'Creating...' : 'Create Task',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -118,8 +137,8 @@ class _AddTaskViewState extends State<AddTaskView> {
         description: description,
         isCompleted: false,
         owner: '',
-        sharedWith: ['default'],
-        shareStatus: {},
+        sharedWith: const ['default'],
+        shareStatus: const {},
       );
 
       await Provider.of<TaskViewModel>(context, listen: false).addTask(task);
