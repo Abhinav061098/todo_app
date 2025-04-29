@@ -9,6 +9,15 @@ class TaskViewModel extends ChangeNotifier {
   final TaskService _taskService = TaskService();
   final AuthService _authService = AuthService();
   static const String _baseUrl = 'https://todo-app-fresh.web.app';
+  bool _isLoading = false;
+  List<Task> _tasks = [];
+  List<Task> _sharedTasks = [];
+  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+
+  bool get isLoading => _isLoading;
+  List<Task> get tasks => _tasks;
+  List<Task> get sharedTasks => _sharedTasks;
+  String? get currentUserId => _authService.currentUserId;
 
   late Stream<List<Task>> taskStream;
   late Stream<List<Task>> sharedTasksStream;
@@ -32,24 +41,63 @@ class TaskViewModel extends ChangeNotifier {
   void initializeStreams(String userId) {
     print('Initializing streams for user: $userId');
     try {
+      _isLoading = true;
+      notifyListeners();
+
       // Convert the streams to broadcast streams to allow multiple listeners
       taskStream = _taskService.taskStream(userId).asBroadcastStream();
       sharedTasksStream =
           _taskService.getSharedTasksStream(userId).asBroadcastStream();
 
-      // Debug listener for shared tasks stream
-      sharedTasksStream.listen(
-        (tasks) {
-          print('Shared tasks stream updated. Found ${tasks.length} tasks');
+      // Listen to task stream changes
+      taskStream.listen(
+        (taskList) {
+          _tasks = taskList;
+          _isLoading = false;
+          notifyListeners();
         },
         onError: (error) {
-          print('Error in shared tasks stream: $error');
+          print('Error in task stream: $error');
+          _isLoading = false;
+          notifyListeners();
         },
       );
 
-      notifyListeners();
+      // Listen to shared tasks stream
+      sharedTasksStream.listen(
+        (sharedTaskList) {
+          _sharedTasks = sharedTaskList;
+          _isLoading = false;
+          notifyListeners();
+        },
+        onError: (error) {
+          print('Error in shared tasks stream: $error');
+          _isLoading = false;
+          notifyListeners();
+        },
+      );
     } catch (e) {
       print('Error initializing streams: $e');
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshTasks() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final userId = _authService.currentUserId;
+      if (userId != null) {
+        initializeStreams(userId);
+      }
+
+      await Future.delayed(
+          const Duration(milliseconds: 500)); // Minimum loading time
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
