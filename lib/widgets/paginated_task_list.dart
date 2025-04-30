@@ -95,7 +95,7 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
             builder: (context, constraints) {
               final width = constraints.maxWidth;
 
-              // More granular breakpoints for better responsiveness
+              
               final isWideScreen = width > 600;
               final crossAxisCount = width > 1200
                   ? 4
@@ -128,7 +128,7 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
                 );
               }
 
-              // For narrow screens, use a more compact list view
+            
               return ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
@@ -145,7 +145,7 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(8), // Reverted back to original padding
+          padding: const EdgeInsets.all(8), 
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             boxShadow: [
@@ -191,7 +191,7 @@ class _PaginatedTaskListState extends State<PaginatedTaskList> {
 
   Widget _buildTaskCard(BuildContext context, Task task) {
     final bool isSharedTask = task.sharedWith.length >
-        1; // If length > 1, it has more than just 'default'
+        1;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
