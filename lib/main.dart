@@ -36,13 +36,13 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initDeepLinking() async {
     _appLinks = AppLinks();
 
-    // Get initial link if app was launched from a link
+
     final uri = await _appLinks.getInitialAppLink();
     if (uri != null) {
       _handleLink(uri);
     }
 
-    // Handle links while app is running
+   
     _appLinks.uriLinkStream.listen((uri) {
       _handleLink(uri);
     });
@@ -84,14 +84,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   String? _extractTaskId(Uri uri) {
-    // Handle web URL format
+    
     if (uri.host == 'todo-app-fresh.web.app' &&
         uri.pathSegments.length == 2 &&
         uri.pathSegments[0] == 'task') {
       return uri.pathSegments[1];
     }
 
-    // Handle custom scheme format
+    
     if (uri.scheme == 'todoapp' &&
         uri.host == 'task' &&
         uri.pathSegments.isNotEmpty) {
@@ -125,7 +125,7 @@ class _MyAppState extends State<MyApp> {
             brightness: Brightness.light,
           ),
           appBarTheme: const AppBarTheme(
-            centerTitle: true, // This centers all AppBar titles
+            centerTitle: true,
           ),
         ),
         onGenerateRoute: _onGenerateRoute,
