@@ -26,7 +26,6 @@ NOTE: **mostly tested on Android
 - **Modern UI/UX**
   - Material Design 3
   - Responsive layout
-  - Dark/Light theme
   - Cross-platform consistency
 
 ## 🛠️ Tech Stack
@@ -67,8 +66,7 @@ dart pub global activate flutterfire_cli
 flutterfire configure
 
 # Run the app
-flutter run -d chrome  # For web
-flutter run -d windows # For Windows
+flutter run
 ```
 
 ## 📁 Project Structure
@@ -101,9 +99,8 @@ lib/
 ## 📫 Contact
 
 For questions about the code or setup:
-- Email: [Your Email]
-- LinkedIn: [Your LinkedIn]
-- GitHub: [Your GitHub]
+- Email: abhinavkumar2994@gmail.com
+- LinkedIn: www.linkedin.com/in/abhinav-kumar-951287139
 
 ## 📝 License
 
