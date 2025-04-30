@@ -16,15 +16,13 @@ class TaskService {
             taskData['id'] = e.key;
             return Task.fromJson(taskData);
           }).where((task) {
-            // Show in My Tasks if:
-            // 1. User is the owner, OR
-            // 2. Task is shared with user AND user has explicitly accepted it
+
             return task.owner == userId ||
                 (task.sharedWith.contains(userId) &&
                     task.shareStatus[userId] == 'accepted');
           }).toList();
 
-          // Sort tasks by creation time, then modification time
+ 
           tasks.sort((a, b) {
             final createdAtCompare =
                 (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
@@ -58,9 +56,7 @@ class TaskService {
             taskData['id'] = e.key;
             return Task.fromJson(taskData);
           }).where((task) {
-            // Show in Shared Tasks if:
-            // 1. Task has more than one entry in sharedWith (more than just 'default')
-            // 2. User is in the sharedWith list
+
             return task.sharedWith.length > 1 &&
                 task.sharedWith.contains(userId);
           }).toList();
@@ -104,7 +100,7 @@ class TaskService {
     }
   }
 
-  // Add a new task
+
   Future<void> addTask(Task task) async {
     try {
       print('Adding new task: ${task.toJson()}');
@@ -112,9 +108,9 @@ class TaskService {
 
       final taskData = task.toJson();
       taskData['id'] = newTaskRef.key;
-      taskData['createdAt'] = ServerValue.timestamp; // Set creation timestamp
+      taskData['createdAt'] = ServerValue.timestamp;
       taskData['lastModifiedAt'] = ServerValue
-          .timestamp; // Set initial modification time same as creation
+          .timestamp; 
 
       await newTaskRef.set(taskData);
       print('Task added successfully with ID: ${newTaskRef.key}');
@@ -125,7 +121,7 @@ class TaskService {
     }
   }
 
-  // Update an existing task
+
   Future<void> updateTask(Task task) async {
     try {
       print('Updating task: ${task.toJson()}');
@@ -137,7 +133,7 @@ class TaskService {
     }
   }
 
-  // Delete a task
+
   Future<void> deleteTask(String taskId) async {
     try {
       await _db.child('tasks/$taskId').remove();
@@ -157,12 +153,11 @@ class TaskService {
         .get();
     if (snapshot.exists) {
       final data = snapshot.value as Map;
-      return data.keys.first; // Assuming UID is the key
+      return data.keys.first;
     }
     return null;
   }
 
-  // Share a task with another user
   Future<void> shareTask(String taskId, String userEmail) async {
     try {
       print('Attempting to share task $taskId with user $userEmail');
@@ -172,8 +167,6 @@ class TaskService {
       if (!snapshot.exists) {
         throw Exception('Task not found');
       }
-
-      // Fetch UID for the email
       final recipientUid = await getUidByEmail(userEmail);
       if (recipientUid == null) {
         throw Exception('User not found for email: $userEmail');
@@ -250,21 +243,21 @@ class TaskService {
       final taskData = Map<String, dynamic>.from(snapshot.value as Map);
       print('Current task data before update: $taskData');
 
-      // Ensure shareStatus and sharedWith are properly initialized
+
       Map<String, dynamic> shareStatus =
           Map<String, dynamic>.from(taskData['shareStatus'] ?? {});
       List<String> sharedWith = List<String>.from(taskData['sharedWith'] ?? []);
 
-      // Remove 'default' if it exists
+
       sharedWith.remove('default');
 
-      // Update the share status to accepted and ensure user is in sharedWith
+
       shareStatus[userId] = 'accepted';
       if (!sharedWith.contains(userId)) {
         sharedWith.add(userId);
       }
 
-      // Using update to modify both shareStatus and sharedWith
+
       final updateData = {
         'shareStatus': shareStatus,
         'sharedWith': sharedWith,
@@ -274,7 +267,7 @@ class TaskService {
       print('Updating task with data: $updateData');
       await taskRef.update(updateData);
 
-      // Verify the update
+    
       final updatedSnapshot = await taskRef.get();
       final updatedData =
           Map<String, dynamic>.from(updatedSnapshot.value as Map);
