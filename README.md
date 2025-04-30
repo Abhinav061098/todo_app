@@ -72,8 +72,10 @@ lib/
      - Firebase Hosting for web deployment
      - 
 4. Setup Firebase Configuration
-
     - Run `flutterfire configure` to generate your `firebase_options.dart`
+      ```bash
+      flutterfire configure
+      ```
     - Place the generated file in `lib/firebase_options.dart`
     - Never commit this file to version control
 
