@@ -27,13 +27,13 @@ class TaskViewModel extends ChangeNotifier {
 
   TaskViewModel() {
     print('TaskViewModel initialized');
-    // Initialize with current user
+
     final userId = _authService.currentUserId;
     if (userId != null) {
       initializeStreams(userId);
     }
 
-    // Listen to auth state changes
+    
     _authService.authStateChanges.listen((user) {
       if (user != null) {
         initializeStreams(user.uid);
@@ -47,12 +47,10 @@ class TaskViewModel extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Convert the streams to broadcast streams to allow multiple listeners
       taskStream = _taskService.taskStream(userId).asBroadcastStream();
       sharedTasksStream =
           _taskService.getSharedTasksStream(userId).asBroadcastStream();
 
-      // Listen to task stream changes
       taskStream.listen(
         (taskList) {
           _tasks = taskList;
@@ -66,7 +64,7 @@ class TaskViewModel extends ChangeNotifier {
         },
       );
 
-      // Listen to shared tasks stream
+
       sharedTasksStream.listen(
         (sharedTaskList) {
           _sharedTasks = sharedTaskList;
@@ -97,7 +95,7 @@ class TaskViewModel extends ChangeNotifier {
       }
 
       await Future.delayed(
-          const Duration(milliseconds: 500)); // Minimum loading time
+          const Duration(milliseconds: 500));
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -115,7 +113,7 @@ class TaskViewModel extends ChangeNotifier {
         description: task.description,
         isCompleted: task.isCompleted,
         owner: userId,
-        // Ensure sharedWith always starts with 'default'
+
         sharedWith: [
           'default',
           ...task.sharedWith.where((id) => id != 'default')
@@ -125,7 +123,7 @@ class TaskViewModel extends ChangeNotifier {
       );
 
       await _taskService.addTask(taskWithOwner);
-      // Ensure the UI updates immediately
+
       await Future.delayed(const Duration(milliseconds: 100));
       initializeStreams(userId);
       notifyListeners();
@@ -160,7 +158,6 @@ class TaskViewModel extends ChangeNotifier {
 
     await _taskService.shareTask(taskId, recipientEmail);
 
-    // Update last modification after sharing
     final task = await _taskService.getTaskById(taskId);
     if (task != null) {
       final displayName = _authService.getCurrentUserDisplayName();
@@ -181,33 +178,33 @@ class TaskViewModel extends ChangeNotifier {
     try {
       print('Starting to accept shared task: $taskId');
 
-      // Get the task first to verify it exists
+
       final task = await _taskService.getTaskById(taskId);
       if (task == null) throw Exception('Task not found');
       print('Found task to accept: ${task.title}');
 
-      // Create new shareStatus map with the accepted status
+
       final updatedShareStatus = Map<String, dynamic>.from(task.shareStatus);
       updatedShareStatus[userId] = 'accepted';
 
-      // Create new sharedWith list ensuring user is included
+
       final updatedSharedWith = List<String>.from(task.sharedWith);
       if (!updatedSharedWith.contains(userId)) {
         updatedSharedWith.add(userId);
       }
 
-      // Update task with new share status and sharedWith list
+
       final updatedTask = task.copyWith(
           lastModifiedBy: _authService.getCurrentUserDisplayName(),
           lastModifiedAt: DateTime.now(),
           shareStatus: updatedShareStatus,
           sharedWith: updatedSharedWith);
 
-      // Update the task in Firebase
+  
       await _taskService.updateTask(updatedTask);
       print('Task updated with new status: ${updatedTask.shareStatus}');
 
-      // Force refresh streams
+
       initializeStreams(userId);
       notifyListeners();
       print('Streams refreshed after accepting task');
