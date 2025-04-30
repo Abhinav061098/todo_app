@@ -9,7 +9,7 @@ class Task {
   final String? originalTaskId;
   final String? lastModifiedBy;
   final DateTime? lastModifiedAt;
-  final DateTime? createdAt; // New field
+  final DateTime? createdAt;
 
   Task({
     this.id,
@@ -22,7 +22,7 @@ class Task {
     this.originalTaskId,
     this.lastModifiedBy,
     this.lastModifiedAt,
-    this.createdAt, // Add to constructor
+    this.createdAt,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -39,7 +39,7 @@ class Task {
       lastModifiedAt: json['lastModifiedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['lastModifiedAt'])
           : null,
-      createdAt: json['createdAt'] != null // Add parsing for createdAt
+      createdAt: json['createdAt'] != null 
           ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
           : null,
     );
@@ -57,7 +57,7 @@ class Task {
       'originalTaskId': originalTaskId,
       'lastModifiedBy': lastModifiedBy,
       'lastModifiedAt': lastModifiedAt?.millisecondsSinceEpoch,
-      'createdAt': createdAt?.millisecondsSinceEpoch, // Add to JSON
+      'createdAt': createdAt?.millisecondsSinceEpoch,
     };
   }
 
@@ -79,7 +79,7 @@ class Task {
     String? originalTaskId,
     String? lastModifiedBy,
     DateTime? lastModifiedAt,
-    DateTime? createdAt, // Add to copyWith
+    DateTime? createdAt,
   }) {
     return Task(
       id: id ?? this.id,
@@ -92,7 +92,7 @@ class Task {
       originalTaskId: originalTaskId ?? this.originalTaskId,
       lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
-      createdAt: createdAt ?? this.createdAt, // Add to constructor call
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
