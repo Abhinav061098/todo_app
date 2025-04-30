@@ -9,7 +9,10 @@ NOTE: **mostly tested on Android
 
 **Demo Credentials**:
 - Email: demo@example.com
-- Password: [Available upon request]
+- Password: Demo@123
+
+NOTE:
+  ** To test all functionalities like task sharing and realtime synchronization you need to login with vaild email.
 
 ## ✨ Key Features
 
