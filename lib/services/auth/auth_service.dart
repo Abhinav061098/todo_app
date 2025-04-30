@@ -4,7 +4,6 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _initialized = false;
 
-  // Auth state changes Stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   Future<void> _ensureInitialized() async {
@@ -15,7 +14,6 @@ class AuthService {
     }
   }
 
-  // Sign in with email and password
   Future<Map<String, dynamic>> signInWithEmailAndPassword(
       String email, String password) async {
     try {
@@ -60,7 +58,7 @@ class AuthService {
           errorMessage = 'Invalid email address';
           break;
         case 'channel-error':
-          // Handle channel error specifically
+      
           await _reInitializeAuth();
           errorMessage = 'Please try again';
           break;
@@ -83,7 +81,6 @@ class AuthService {
     await _ensureInitialized();
   }
 
-  // Register with email and password
   Future<Map<String, dynamic>> registerWithEmailAndPassword(
       String email, String password, String displayName) async {
     try {
@@ -93,7 +90,6 @@ class AuthService {
       );
       final user = credential.user;
 
-      // Set display name
       if (user != null) {
         await user.updateDisplayName(displayName);
       }
@@ -114,12 +110,10 @@ class AuthService {
     }
   }
 
-  // Sign out
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  // Get current user
   Map<String, dynamic>? get currentUser {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -130,10 +124,10 @@ class AuthService {
     };
   }
 
-  // Get current user ID
+
   String? get currentUserId => _auth.currentUser?.uid;
 
-  // Get current user display name
+
   String? getCurrentUserDisplayName() {
     final user = _auth.currentUser;
     return user?.displayName ?? user?.email?.split('@')[0] ?? user?.uid;
