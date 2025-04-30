@@ -43,7 +43,7 @@ class TaskListWidget extends StatelessWidget {
 
   Widget _buildTaskCard(BuildContext context, Task task) {
     final bool isSharedTask = task.sharedWith.length >
-        1; // If length > 1, it has more than just 'default'
+        1; 
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
